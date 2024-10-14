@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"time"
 )
 
 func main() {
 	var stdin = bufio.NewReader(os.Stdin)
+
+	rand.Seed(time.Now().UnixNano())
 
 	num := rand.Intn(100)
 	count := 0
