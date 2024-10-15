@@ -13,7 +13,7 @@ package main
 import "fmt"
 
 func changeArray(arr [5]int) {
-	arr[2] = 200
+	//arr[2] = 200	// 포인터로 변경하라는 표시떠서 주석처리
 }
 
 func changeSlice(slice []int) {
