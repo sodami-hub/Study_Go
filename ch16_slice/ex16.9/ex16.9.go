@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+// 슬라이스 복사하는 방법 3 ( 서로 영향 주지 않는 새로운 슬라이스로.. ) copy(dest,src) int 사용.
+
 func main() {
 	slice1 := []int{1, 2, 3, 4, 5}
 	slice2 := make([]int, 3, 10) // len 3, cap 10
