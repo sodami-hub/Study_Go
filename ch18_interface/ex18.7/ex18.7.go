@@ -18,7 +18,8 @@ func (s *Student) String() string { // 1. Student는 Stringer인터페이스의 
 }
 
 func PrintAge(stringer Stringer) { // 3. Student 객체 s를 Stringer형으로 자동 타입변환시킴.
-	s := stringer.(*Student) //4. Stringer 로 자동 타입변환된 s를 다시 Student 객체로 타입변환... s는 -> s instanceof Student
+	s, ok := stringer.(*Student) //4. Stringer 로 자동 타입변환된 s를 다시 Student 객체로 타입변환... s는 -> s instanceof Student
+	fmt.Println(ok)
 	fmt.Printf("Age: %d\n", s.Age)
 }
 
