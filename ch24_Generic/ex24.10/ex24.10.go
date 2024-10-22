@@ -16,9 +16,10 @@ func main() {
 		{"bob", 24},
 		{"gopher", 13},
 	}
-	// 대신 BinarySearchFunc 를 사용하면 검색할 수 있다.
+	// 대신 BinarySearchFunc 를 사용하면 검색할 수 있다. 세번째 인자로 들어가는 함수를 볼것!
+	// BinarySearchFunc[S ~[]E, E, T any](x S, target T, cmp func(E, T) int) (int, bool)
 	n, found := slices.BinarySearchFunc(people, "bob", func(a Person, b string) int {
-		return cmp.Compare(a.Name, b)
+		return cmp.Compare(a.Name, b) // Compare[T Ordered](a, b T) int
 	})
 	fmt.Println("bob :", n, found)
 }
