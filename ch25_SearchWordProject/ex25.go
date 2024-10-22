@@ -31,6 +31,7 @@ func FindMatch(list []string, target string) {
 
 			}
 		}
+		file.Close()
 	}
 }
 
