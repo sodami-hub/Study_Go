@@ -6,36 +6,41 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
-func FindMatch(list []string, target string) {
+var wg sync.WaitGroup
+var mutex sync.Mutex // 뮤텍스로 하는건 좀 웃긴데.. 무슨 의미가 있지. ㅋㅋㅋ 예제를 보고 풀어봐야될 듯.
+
+func stringMatcher(fileName, target string) {
+	mutex.Lock()
 	var scan *bufio.Scanner
 	var scanLine string
-	var fileName string
 
-	for _, fileName = range list {
-		fmt.Println()
-		fmt.Println("====== ", fileName, " ======")
-		file, err := os.Open(fileName)
-		if err != nil {
-			fmt.Println("file open error")
-			return
-		}
-		scan = bufio.NewScanner(file)
-		i := 0
-		for scan.Scan() {
-			i++
-			scanLine = scan.Text()
-			if strings.Contains(scanLine, target) {
-				fmt.Println(i, " | ", scanLine)
-
-			}
-		}
-		file.Close()
+	fmt.Println()
+	fmt.Println("====== ", fileName, " ======")
+	file, err := os.Open(fileName)
+	if err != nil {
+		fmt.Println("file open error")
+		return
 	}
+	scan = bufio.NewScanner(file)
+	i := 0
+	for scan.Scan() {
+		i++
+		scanLine = scan.Text()
+		if strings.Contains(scanLine, target) {
+			fmt.Println(i, " | ", scanLine)
+
+		}
+	}
+	file.Close()
+	mutex.Unlock()
+	wg.Done()
 }
 
 func main() {
+
 	if len(os.Args) < 3 {
 		fmt.Println("usage : (실행명령어) (찾을단어) (대상파일)")
 		return
@@ -48,7 +53,13 @@ func main() {
 		fmt.Println("file path error!!")
 		return
 	}
-	FindMatch(fileList, TargetWord)
+
+	wg.Add(len(fileList))
+	for _, fileName := range fileList {
+		go stringMatcher(fileName, TargetWord)
+	}
+
+	wg.Wait()
 }
 
 /*
