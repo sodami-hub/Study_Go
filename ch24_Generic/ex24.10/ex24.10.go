@@ -1,3 +1,6 @@
+// 제네릭을 사용해서 만든 유용한 페키지
+// slices
+
 package main
 
 import (
@@ -22,4 +25,17 @@ func main() {
 		return cmp.Compare(a.Name, b) // Compare[T Ordered](a, b T) int
 	})
 	fmt.Println("bob :", n, found)
+
+	// clone
+
+	slice := []int{1, 2, 3, 4, 5}
+	slice2 := slices.Clone(slice) // 슬라이스를 복제해서 새로운 슬라이스를 반환.
+
+	fmt.Println(slice2)
+	slice2[1] = 100
+
+	fmt.Println(slice, slice2)
+
+	// concat
+	fmt.Println(slices.Concat(slice, slice2))
 }
