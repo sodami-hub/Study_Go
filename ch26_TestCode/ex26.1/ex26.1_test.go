@@ -1,6 +1,6 @@
 /*
 go mod init goproject/ch26_TestCode/ex26.1
-go get github.com/stretchr/testif
+go get github.com/stretchr/testify
 
 코드를 다 작성하고
 해당 디렉터리의 go.mod 파일에서 디펜던시를 업데이트해줘야 됨.(코드에 필요한 디펜던시 불러옴)
