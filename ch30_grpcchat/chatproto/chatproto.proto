@@ -1,0 +1,23 @@
+//grpc채팅 프로그램을 만들기 위해서는 클라이언트와 서버 간 주고받을 데이터를 정의하는 서비스 정의 파일을 만들어야 됨.
+
+syntax ="proto3";
+
+// 1. 패키지 이름이 들어감
+option go_package ="ch30_grpcchat/chatproto";
+
+package chatproto;
+
+// 2. 서비스 정의이다. Chat() 함수를 포함하고 있다. 다른 기능이 더 필요하면 여기에 함수 정의를 추가한다.
+service ChatService {
+    rpc Chat(stream ChatMsg) returns (stream ChatMsg) {}
+}
+
+// 3. Chat 기능에 사용되는 구조체 정의
+message ChatMsg {
+    string sender = 1;
+    string message = 2;
+}
+
+// 현재 폴더에서 
+// > protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative chatproto.proto 
+// 실행 하면 파일이 두개 생김
