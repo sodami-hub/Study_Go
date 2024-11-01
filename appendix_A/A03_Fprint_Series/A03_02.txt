@@ -1,0 +1,7 @@
+fmt.Fprint() 함수는 io.Writer 인스턴스에 원하는 형태의 문자열을 쓸 때 사용한다.
+
+func Fprint(w io.Writer, a ...interface{})(n int, err error)
+func Fprintf(w io.Writer, format string, a ...interface{}) (n int, err error)
+func Fprintln(w io.Writer, a ...interface{}) (n int, err error)
+
+Print()는 표준 출력인 os.Stdout에 쓰는 반면 Fprint() 시리즈는 프로그래머가 어떤 io.Writer에 쓸지 정할 수 있다는 점이다.

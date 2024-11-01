@@ -1,0 +1,35 @@
+1. Integer 타입
+
+range 뒤에 integer 타입 값이 오면 0부터 값 -1 까지 순회
+
+var n int = 10
+for i:= range n {
+    fmt.Println(i) // 0~9까지 출력
+}
+
+2. 문자열 타입
+
+var str := "hello 월드"
+for i, c := range str {
+    //i는 인덱스, c는 문자값 'h','e','l','l','o','월,'드'
+}
+
+3. 슬라이스 타입
+
+var slice := []int{1,2,3,4,5}
+for i,v := range slice {
+    i는 인덱스, v는 요소값
+}
+
+4. 맵 타입
+
+var m:= map[string]int{ "aaa":1, "bbb":2 , "ccc":3 }
+for k,v := range m{
+    // k는 키, v는 키에 해당하는 값
+}
+
+5. 채널 타입 : 채널에서 값이 들어올 때까지 계속 대기한다. 값이 들어오면 들어온 값을 채널에서 빼내서 반환한다. 이것은 채널이 close()로 닫힐 때까지 계속 반복된다.
+var ch := make(chan int) 
+for v := range ch {
+    // 계속 채널에 값이 들어올 때까지 대기하며 들어온 값을 반환한다.
+}

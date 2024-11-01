@@ -1,0 +1,57 @@
+입출력처리
+
+Go 언어는 io 패키지의 Reader, Writer 인터페이스를 사용해서 모든 입출력을 처리한다.
+
+Reader는 단 하나의 메서드만 정의된 인터페이스다.
+
+type Reader interface {
+    Read(p []byte) (n int, err error)
+}
+
+Read() 메서드는 기본적으로 읽은 데이터를 저장할 수 있는 byte 슬라이스를 생성해서 넣어주면 p 슬라이스 크기만큼 데이터를 읽어서 채워준다.
+
+type Writer interface {
+    Writer(p []byte)(n int, err error)
+}
+
+io.Reader, io.Writer 인터페이스는 가장 기본적인 메서드만 제공하기 때문에 바로 사용하기 불편하다. 
+그래서 내부에 메모리 버퍼를 가진 bufio의 Reader나 Writer 또는 Scanner를 사용해야 편리하게 이용할 수 있다.
+
+- bufio.Reader 객체
+
+type Reader 
+    func NewReader(re io.Reader) *Reader
+    func (b *Reader) ReadLine() (line []byte, isPrefix bool, err error)
+    func (b *Reader) ReadRune() (r rune, size int, err error)
+    func (b *Reader) ReadString(delim byte) (string, error)
+
+bufio.Reader 객체는 NewReader() 함수의 인수로 io.Reader를 넣어서 생성할 수 있다.
+Reader 객체는 한 줄만 읽는 ReadLine(), 한 문자를 읽는 ReadRune(), 특정 구분자가 나올 때까지 문자열을 읽는 ReadString() 등의 메서드를 제공한다.
+
+
+- bufio.Scanner 객체
+
+type Scanner
+    func NewScanner(r io.Reader) *Scanner
+    func (s *Scanner) Scan() bool
+    func (s *Scanner) Err() error
+    func (s *Scanner) Split(split SplitFunc)
+    func (s *Scanner) Text() string
+
+특정 패턴을 반복해서 읽을 때는 Scanner가 편리하다. Scan() 메서드를 이용해서 토큰을 읽어오고, Text()메서드를 이용해서 토큰을 반환한다.
+토큰이란 패턴에 해당하는 만큼 읽어온 문자열을 말한다.
+Scan()에서 읽기에 실패한 경우 false를 반환한다. 일반적으로 더 읽을 수 없을 때 false를 반환한다. 그외의 경우는 Err() 메서드를 통해서 오류를 검사할 수 있다.
+
+- bufio.Writer 객체
+bufio.Writer객체는 io.Writer 인스턴스에 문자열을 쓸 때 유용하다.
+
+type Writer
+    func NewWriter(w io.Writer) *Writer
+    func (b *Writer) WriteString(s string)(int, error)
+
+bufio.Writer 객체를 이요해서 io.Writer 인터페이스를 손쉽게 이용할 수 있다. 보통 WriterString() 메서드로 문자열을 쓸 때 이용한다.
+하지만 fmt 패키지의 Fprint() 시리즈를 이용하면 더 편하게 원하는 형태로 io.Writer 인스턴스에 문자열을 쓸 수 있다.
+
+- io.ReadAll() 함수 : io.Reader 인스턴스의 모든 데이터를 읽어올 때 사용하는 함수이다.
+
+func ReadAll(r Reader) ([]byte, error)

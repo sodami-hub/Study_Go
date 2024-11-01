@@ -3,5 +3,8 @@
 *.dll
 *.obj
 *.sum
-*.txt
 *.prof
+teab.txt
+test.txt
+hamlet.txt
+romeonjuliet.txt
