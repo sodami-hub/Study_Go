@@ -1,4 +1,6 @@
-package main
+// 127.0.0.1 주소에서 랜덤 포트에 수신 대기 중인 리스너 생성하기
+
+package ch03
 
 import (
 	"net"
