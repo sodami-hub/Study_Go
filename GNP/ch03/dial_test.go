@@ -9,7 +9,7 @@ import (
 )
 
 func TestDial(t *testing.T) {
-	// 랜덤 포트에 리스너 생성
+	// 서버측 코드 : 랜덤 포트에 리스너 생성
 	listener, err := net.Listen("tcp", "127.0.0.1:0") // 리스너 생성
 	if err != nil {
 		t.Fatal("create listener err", err)
@@ -21,7 +21,7 @@ func TestDial(t *testing.T) {
 		defer func() { done <- struct{}{} }() // 고루틴을 닫을 때 빈구조체 인스턴스를 채널에 전송
 
 		for {
-			conn, err := listener.Accept() // 고루틴에서 클라이언트로부터의 연결을 대기
+			conn, err := listener.Accept() // 고루틴에서 클라이언트로부터의 연결을 수락
 			if err != nil {
 				t.Log(err)
 				return
@@ -48,7 +48,8 @@ func TestDial(t *testing.T) {
 		}
 	}()
 
-	conn, err := net.Dial("tcp", listener.Addr().String())
+	// 클라이언트 측 코드
+	conn, err := net.Dial("tcp", listener.Addr().String()) // 서버에 연결 요청
 	if err != nil {
 		t.Fatal(err)
 	}
