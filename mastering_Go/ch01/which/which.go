@@ -18,20 +18,19 @@ func main() {
 
 	for _, directory := range pathSplit {
 		fullPath := filepath.Join(directory, file)
+		fmt.Println(fullPath)
 		// 파일이 존재하는가?
-		_, err := os.Stat(fullPath)
+		fileInfo, err := os.Stat(fullPath)
 		if err == nil {
-			//mode := fileInfo.Mode()
-			fmt.Println(fullPath)
-			// 일반 파일인가?
-			// if mode.IsRegular() {
-			// 	//실행 파일인가?
-			// 	if mode&0111 != 0 {
-			// 		fmt.Println(fullPath)
-			// 		return
-			// 	}
-			// }
-			return
+			mode := fileInfo.Mode()
+			//일반 파일인가?
+			if mode.IsRegular() {
+				//실행 파일인가?
+				if mode&0111 != 0 {
+					fmt.Println(fullPath)
+					return
+				}
+			}
 		}
 	}
 }
