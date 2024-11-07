@@ -18,7 +18,6 @@ func main() {
 
 	for _, directory := range pathSplit {
 		fullPath := filepath.Join(directory, file)
-		fmt.Println(fullPath)
 		// 파일이 존재하는가?
 		fileInfo, err := os.Stat(fullPath)
 		if err == nil {
