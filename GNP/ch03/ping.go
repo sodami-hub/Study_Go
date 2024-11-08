@@ -41,7 +41,7 @@ func Pinger(ctx context.Context, w io.Writer, reset <-chan time.Duration) {
 				interval = newInterval
 			}
 		case <-timer.C: // 타이머가 만료되면 핑을 보냄
-			if _, err := w.Write([]byte("ping")); err != nil {
+			if _, err := w.Write([]byte("pingpingping~")); err != nil {
 				// 여기서 연속적으로 발생하는 타임아웃을 추적하고 처리
 				return
 			}
