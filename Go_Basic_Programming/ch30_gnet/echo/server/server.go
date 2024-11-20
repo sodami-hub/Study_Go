@@ -39,7 +39,8 @@ func (es *echoServer) OnBoot(eng gnet.Engine) gnet.Action {
 // 4. 서버가 데이터를 네트워크를 통해서 클라이어트로부터 수신할 때 호출된다.
 func (es *echoServer) OnTraffic(c gnet.Conn) gnet.Action {
 	buf, _ := c.Next(-1) // 모든 데이터를 읽는다.
-	c.Write(buf)         // 읽은 데이터를 다시 전송한다.
+	fmt.Printf("클라이언트 메세지 : %s", string(buf))
+	c.Write(buf) // 읽은 데이터를 다시 전송한다.
 	return gnet.None
 }
 
