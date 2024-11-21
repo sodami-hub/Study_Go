@@ -6,21 +6,21 @@ package main
 
 import (
 	"flag"
-	"io/ioutil"
 	"log"
+	"os"
 
 	"GNP/ch06/main/tftp"
 )
 
 var (
 	address = flag.String("a", "127.0.0.1:69", "listen address")
-	payload = flag.String("p", "/home/sodami/Documents/Work_Space/study_go/GNP/ch06/main/tftp/image.jpg", "file to serve to client")
+	payload = flag.String("p", "C:\\Users\\leejinhun\\GoProject\\study_go\\GNP\\ch06\\main\\tftp\\image.jpg", "file to serve to client")
 )
 
 func main() {
 	flag.Parse()
 
-	p, err := ioutil.ReadFile(*payload)
+	p, err := os.ReadFile(*payload)
 	if err != nil {
 		log.Fatal(err)
 	}

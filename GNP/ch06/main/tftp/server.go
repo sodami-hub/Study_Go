@@ -125,7 +125,7 @@ NEXTPACKET:
 				log.Printf("[%s] received error : %v", clientAddr, errPkt.Message)
 				return
 			default:
-				log.Printf("[%s] bad request", clientAddr)
+				log.Printf("[%s] bad packet!!!", clientAddr)
 			}
 		}
 		log.Printf("[%s] exhausted retries", clientAddr)

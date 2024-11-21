@@ -122,7 +122,7 @@ func (q *ReadReq) UnmarshalBinary(p []byte) error {
 	// 바이너리를 빅엔디언 방식으로 읽어서 OpCode에 저장한다.
 	err := binary.Read(r, binary.BigEndian, &code) // OP코드 읽어서 code에 저장
 	if err != nil {
-		return nil
+		return errors.New("opcode 에러")
 	}
 
 	if code != OpRRQ {
@@ -141,7 +141,7 @@ func (q *ReadReq) UnmarshalBinary(p []byte) error {
 
 	q.Mode, err = r.ReadString(0) // 모드 정보 읽기
 	if err != nil {
-		return err
+		return errors.New("mode info Error")
 	}
 	q.Mode = strings.TrimRight(q.Mode, "\x00") // 0바이트 제거( \x00 아스키 코드의 널문자 0에 해당)
 	if len(q.Mode) == 0 {
@@ -251,7 +251,7 @@ func (a Ack) MarshalBinary() ([]byte, error) {
 }
 
 func (a Ack) UnMarshalBinary(p []byte) error {
-	b := bytes.NewBuffer(p)
+	b := bytes.NewReader(p)
 
 	var opcode OpCode
 	err := binary.Read(b, binary.BigEndian, &opcode)
