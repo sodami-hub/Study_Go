@@ -194,7 +194,7 @@ func (d *Data) MarshalBinary() ([]byte, error) {
 
 	// BlockSize 만큼 쓰기
 	_, err = io.CopyN(b, d.Payload, BlockSize)
-	if err != nil {
+	if err != nil && err != io.EOF {
 		return nil, err
 	}
 
@@ -209,12 +209,12 @@ func (d *Data) UnmarshalBinary(p []byte) error {
 
 	var opcode OpCode
 
-	err := binary.Read(bytes.NewBuffer(p[:2]), binary.BigEndian, &opcode) // 2바이트의 해더만 읽기(opcode)
+	err := binary.Read(bytes.NewReader(p[:2]), binary.BigEndian, &opcode) // 2바이트의 해더만 읽기(opcode)
 	if err != nil || opcode != OpData {
 		return errors.New("invalid Data")
 	}
 
-	err = binary.Read(bytes.NewBuffer(p[2:4]), binary.BigEndian, &d.Block) // 블럭의 순서 읽어오기
+	err = binary.Read(bytes.NewReader(p[2:4]), binary.BigEndian, &d.Block) // 블럭의 순서 읽어오기
 	if err != nil {
 		return errors.New("invalid Data")
 	}
@@ -233,7 +233,7 @@ type Ack uint16 // 수신 확인 패킷 -> 이 정수는 수신 확인된 블록
 
 func (a Ack) MarshalBinary() ([]byte, error) {
 	b := new(bytes.Buffer)
-	cap := 4
+	cap := 2 + 2
 
 	b.Grow(cap)
 
@@ -250,16 +250,16 @@ func (a Ack) MarshalBinary() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func (a Ack) UnMarshalBinary(p []byte) error {
+func (a *Ack) UnmarshalBinary(p []byte) error {
 	b := bytes.NewReader(p)
 
-	var opcode OpCode
-	err := binary.Read(b, binary.BigEndian, &opcode)
+	var code OpCode
+	err := binary.Read(b, binary.BigEndian, &code)
 	if err != nil {
 		return err
 	}
 
-	if opcode != OpAck {
+	if code != OpAck {
 		return errors.New("invalid Ack")
 	}
 
@@ -305,7 +305,7 @@ func (e Err) MarshalBinary() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-func (e *Err) UnMarshalBinary(p []byte) error { // 값을 변경해야 되기 때문에 포인터로 가져온다.
+func (e *Err) UnmarshalBinary(p []byte) error { // 값을 변경해야 되기 때문에 포인터로 가져온다.
 	b := bytes.NewBuffer(p)
 
 	var opcode OpCode
@@ -318,7 +318,7 @@ func (e *Err) UnMarshalBinary(p []byte) error { // 값을 변경해야 되기 �
 		return errors.New("invalid Err")
 	}
 
-	err = binary.Read(b, binary.BigEndian, e.Error)
+	err = binary.Read(b, binary.BigEndian, &e.Error)
 	if err != nil {
 		return err
 	}

@@ -114,14 +114,28 @@ NEXTPACKET:
 				return
 			}
 
+			// ackErr := ackPkt.UnmarshalBinary(buf)
+			// errErr := errPkt.UnmarshalBinary(buf)
+
+			// if ackErr == nil {
+			// 	if uint16(ackPkt) == dataPkt.Block {
+			// 		continue NEXTPACKET
+			// 	}
+			// } else if errErr == nil {
+			// 	log.Printf("[%s] received error : %v", clientAddr, errPkt.Message)
+			// 	return
+			// } else {
+			// 	log.Printf("[%s] bad packet!!! %s, %s", clientAddr, ackErr, errErr)
+			// }
+
 			// 클라이언트로 받은 바이트를 Ack, Err 객체로 언마샬리을 시도한다.
 			switch {
-			case ackPkt.UnMarshalBinary(buf) == nil: // 클라이언트로부터 ACK 패킷이 왔다.
+			case ackPkt.UnmarshalBinary(buf) == nil: // 클라이언트로부터 ACK 패킷이 왔다.
 				if uint16(ackPkt) == dataPkt.Block { // 블럭번호를 확인하고 방금 보낸 블럭번호가 맞으면 다음 패킷으로
 					// 블럭 번호가 맞지않으면 for 루프를 한번 더 돌아서 현재 패킷을 다시 보냄
 					continue NEXTPACKET
 				}
-			case errPkt.UnMarshalBinary(buf) == nil: // 클라이언트로 에러 패킷이 왔다.
+			case errPkt.UnmarshalBinary(buf) == nil: // 클라이언트로 에러 패킷이 왔다.
 				log.Printf("[%s] received error : %v", clientAddr, errPkt.Message)
 				return
 			default:

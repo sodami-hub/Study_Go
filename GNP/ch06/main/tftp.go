@@ -14,7 +14,7 @@ import (
 
 var (
 	address = flag.String("a", "127.0.0.1:69", "listen address")
-	payload = flag.String("p", "C:\\Users\\leejinhun\\GoProject\\study_go\\GNP\\ch06\\main\\tftp\\image.jpg", "file to serve to client")
+	payload = flag.String("p", "image.jpg", "file to serve to client")
 )
 
 func main() {
