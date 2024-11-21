@@ -20,7 +20,7 @@ type Server struct {
 }
 
 func (s Server) ListenAndServe(addr string) error {
-	conn, err := net.ListenPacket("tcp", addr)
+	conn, err := net.ListenPacket("udp", addr)
 	if err != nil {
 		return err
 	}
