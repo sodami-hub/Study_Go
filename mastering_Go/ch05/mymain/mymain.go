@@ -7,7 +7,9 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/sodami-hub/Study_Go/mastering_Go/ch05/mypackage"
+	//"github.com/sodami-hub/Study_Go/mastering_Go/ch05/mypackage"
+
+	"mypackage"
 )
 
 var MIN = 0
@@ -55,14 +57,31 @@ func main() {
 	random_username := getString(5)
 
 	t := mypackage.Userdata{
-		Username:   random_username,
-		Name:       "sodam",
-		Surname:    "lee",
-		Descrption: "놀자",
+		Username:    random_username,
+		Name:        "sodam",
+		Surname:     "lee",
+		Description: "놀자",
 	}
 
 	id := mypackage.AddUser(t)
 	if id == -1 {
 		fmt.Println("adduser error", t.Username)
 	}
+
+	// err = mypackage.DeleteUser(1)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+
+	// t = mypackage.Userdata{
+	// 	Username:    "HGALO",
+	// 	Name:        "해든",
+	// 	Surname:     "이",
+	// 	Description: "싫어",
+	// }
+
+	// err = mypackage.UpdateUser(t)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
 }

@@ -51,7 +51,7 @@ func exist(name string) int {
 
 	userId := -1
 
-	row, err := db.Query(`select "id" from "users" where username='%s'`, username)
+	row, err := db.Query(`select id from users where username=?`, username)
 	if err != nil {
 		return -1
 	}
@@ -88,21 +88,20 @@ func AddUser(data Userdata) int {
 	}
 
 	// 매개변수를 이용한 쿼리만들기
-	statement := `insert into users(username) values ($1)`
-	_, err = db.Exec(statement, userName)
+	_, err = db.Exec("insert into users(Username) values(?)", userName)
 
 	if err != nil {
 		fmt.Println(err)
 		return -1
 	}
 
-	userId = exist(userName)
+	userId = exist(data.Username)
 	if userId == -1 {
 		return userId
 	}
 
 	// userdata 테이블에 입력
-	statement = `insert into userdata(userid,name,surname,dexcription) values($1,$2,$3,$4)`
+	statement := `insert into userdata(userid,name,surname,description) values(?,?,?,?)`
 
 	// Exec() 리턴되는 row 값이 없이 실행!
 	_, err = db.Exec(statement, userId, data.Name, data.Surname, data.Description)
@@ -121,7 +120,7 @@ func DeleteUser(id int) error {
 	}
 	defer db.Close()
 
-	statement := `select username from users where id = $1`
+	statement := `select username from users where id=?`
 	row, err := db.Query(statement, id)
 	if err != nil {
 		return err
@@ -141,13 +140,13 @@ func DeleteUser(id int) error {
 	}
 
 	// Userdata에서 지운다.
-	deleteStatement := `delete from userdata where userid=$1`
+	deleteStatement := `delete from userdata where userid=?`
 	_, err = db.Exec(deleteStatement, id)
 	if err != nil {
 		return err
 	}
 
-	deleteStatement = `delete form users where id = $1`
+	deleteStatement = `delete from users where id = ?`
 	_, err = db.Exec(deleteStatement, id)
 	if err != nil {
 		return err
@@ -197,7 +196,7 @@ func UpdateUser(data Userdata) error {
 
 	data.ID = userId
 
-	statement := `update userdata set name=$1, surname=$2, description=$3 where UserId = $4`
+	statement := `update userdata set name=?, surname=?, description=? where UserId = ?`
 
 	_, err = db.Exec(statement, data.Name, data.Surname, data.Description, data.ID)
 	if err != nil {
