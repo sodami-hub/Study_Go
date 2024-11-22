@@ -27,7 +27,7 @@ var (
 )
 
 func OpenConnection() (*sql.DB, error) {
-	conn := "root:admin@tcp(localhost:3306)/test_db"
+	conn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", Username, Password, Hostname, Port, Database)
 
 	db, err := sql.Open("mysql", conn)
 	if err != nil {

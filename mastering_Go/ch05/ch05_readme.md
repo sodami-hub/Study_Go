@@ -52,6 +52,30 @@
 - 필요한 함수를 개발
 - Go 패키지를 사용
 - CI/CD 도구로 자동화
+
+#### 패키지 설계 및 구현[/mypackage] -> 실행[mymain]
+- mysql에 연습에 사용할 데이터베이스 생성및 테이블 생성
+```
+create database go;
+use go;
+
+create table Users (
+	id serial,
+    Username varchar(100) primary key
+    );
+
+create table userdata (
+	UserId int not null,
+    name varchar(100),
+    surname varchar(100),
+    description varchar(200)
+    );
+```
+- 사용자 생성
+- 사용자 삭제
+- 사용자 업데이트
+- 사용자 목록 확인
+
 ## 모듈
 
 ## 더 나은 패키지 만들기
