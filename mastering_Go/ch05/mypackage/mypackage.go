@@ -11,16 +11,16 @@ import (
 
 // 사용할 DB의 두개의 테이블의 데이터를 하나로 합쳤다.
 type Userdata struct {
-	ID         int
-	Username   string
-	Name       string
-	Surname    string
-	Descrption string
+	ID          int
+	Username    string
+	Name        string
+	Surname     string
+	Description string
 }
 
 var (
 	Hostname = ""
-	Port     = 3036
+	Port     = ""
 	Username = ""
 	Password = ""
 	Database = ""
@@ -105,7 +105,7 @@ func AddUser(data Userdata) int {
 	statement = `insert into userdata(userid,name,surname,dexcription) values($1,$2,$3,$4)`
 
 	// Exec() 리턴되는 row 값이 없이 실행!
-	_, err = db.Exec(statement, userId, data.Name, data.Surname, data.Descrption)
+	_, err = db.Exec(statement, userId, data.Name, data.Surname, data.Description)
 	if err != nil {
 		fmt.Println("db.Exec()", err)
 		return -1
@@ -172,7 +172,7 @@ func ListUsers() ([]Userdata, error) {
 
 	for rows.Next() {
 		var userdata Userdata
-		err = rows.Scan(&userdata.ID, &userdata.Name, &userdata.Surname, &userdata.Descrption)
+		err = rows.Scan(&userdata.ID, &userdata.Name, &userdata.Surname, &userdata.Description)
 		if err != nil {
 			return nil, err
 		}
@@ -199,7 +199,7 @@ func UpdateUser(data Userdata) error {
 
 	statement := `update userdata set name=$1, surname=$2, description=$3 where UserId = $4`
 
-	_, err = db.Exec(statement, data.Name, data.Surname, data.Descrption, data.ID)
+	_, err = db.Exec(statement, data.Name, data.Surname, data.Description, data.ID)
 	if err != nil {
 		return err
 	}

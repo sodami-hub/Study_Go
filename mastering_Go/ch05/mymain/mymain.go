@@ -39,7 +39,7 @@ func main() {
 	mypackage.Username = "root"
 	mypackage.Password = "admin"
 	mypackage.Database = "go"
-	mypackage.Port = 3306
+	mypackage.Port = "3306"
 
 	data, err := mypackage.ListUsers()
 	if err != nil {
