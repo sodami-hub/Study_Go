@@ -7,9 +7,8 @@ import (
 	"math/rand"
 	"time"
 
-	//"github.com/sodami-hub/Study_Go/mastering_Go/ch05/mypackage"
-
-	"mypackage"
+	"github.com/sodami-hub/Study_Go/mastering_Go/ch05/mypackage"
+	//"mypackage"
 )
 
 var MIN = 0
