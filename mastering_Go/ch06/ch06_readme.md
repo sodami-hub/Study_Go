@@ -86,9 +86,15 @@ type NoEmpty struct {
 ##### JSON 레코드 출력 다듬기[/prettyPrint]
 - json의 인코딩 또는 마샬에서 indent를 사용하는 방법을 보여준다.
 
-### 8. XML 데이터 처리
+### 8. XML 데이터 처리[/xml]
+- Go 구조체에 XML 관련 태그를 추가해 XML 레코드를 encoding/xml 패키지의 xml.Unmarshal()과 xml.Marshal()을 이용해 관련 필드를 직렬화하거나 역직렬화한다. 하지만 /xml/xml.go 에서 JSON과의 차이점을 살펴볼 수 있다.
+##### JSON과 XML변환[/JSON2XML]
 
-### 9. YAML 데이터 처리
+### 9. YAML 데이터 처리[/yaml]
+- Go 표준 라이브러리는 YAML 파일을 지원하지 않으므로 YAML을 지원하는 외부 라이브러리가 있는지 살펴봐야 된다. 다음 세개의 패키지들이 Go에서 YAML을 다룰 수 있게 해준다.
+- https://github.com/kylelemons/go-gypsy
+- https://github.com/go-yaml/yaml
+- https://github.com/goccy/go-yaml
 
 ### 10. viper 패키지
 
