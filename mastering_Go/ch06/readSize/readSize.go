@@ -30,11 +30,12 @@ func main() {
 
 	for _, v := range args[1:] {
 		f, err := os.Open(v)
-		read := readSize(f, 1024)
 		if err != nil {
 			fmt.Println("error!!", err)
 			break
 		}
+		defer f.Close()
+		read := readSize(f, 1024)
 		fmt.Println(string(read))
 	}
 }

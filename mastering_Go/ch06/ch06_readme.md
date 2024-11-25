@@ -58,6 +58,7 @@ type Writer interface {
 - 파일의 작은 일부분만을 보고 싶은 경우에 사용할 수 있는 코드이다.
 
 ### 파일 쓰기
+- [/writeFile]
 
 ### JSON 데이터 처리
 
