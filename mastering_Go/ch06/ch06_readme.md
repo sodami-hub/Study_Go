@@ -115,3 +115,22 @@ type NoEmpty struct {
 ### 12. 유닉스 파일 시스템에서 순환 참조 찾기[/FScycles]
 - 유닉스 파일 시스템에서는 심볼릭 링크를 이용하면 파일 시스템에 순환 참조가 생길수 있다. 이로 인해서 tar(1), find(1) 같은 유틸리티를 사용할 때 문제가 발생할 수 있고, 보안 관련 이슈가 발생할 수 있다. 순환 참조가 이뤄지고 있는지 찾는 실용적인 유닉스 유틸리티를 구현한다. 
 - 해결방법은 방문한 모든 디렉터리 경로를 맵에 기록하고 해당 경로가 두 번 이상 나타난다면 사이클이 있다고 판단하는 것이다. 
+
+
+### 13. Go 1.16의 새로운 기능(현재 버전 1.23.2)
+- os.ReadDir() 함수, os.DirEntry 타입, io/fs 패키지
+
+##### 파일 임베딩
+- 임베딩한 파일의 데이터를 저장할 수 있는 타입은 string, []byte, embed.FS가 있다. 이 기능을 이용하면 Go 바이너리를 실행할 때 수동으로 파일을 다운로드할 필요가 없다.
+- [/embedFiles] 에서는 주어진 커맨드라인 인수에 따라 두 가지 다른 파일을 검색할 수 있다.
+
+##### ReadDir, DirEntry[/ReadDirEntry]
+- io/ioutil 패키지가 사라졌다. io/ioutil 패키지의 기능은 다음처럼 다른 패키지로 옮겨졌다.
+- 새로 추가된 os.ReadDir 함수는 []DirEntry를 반환한다. 따라서 []FileInfo를 반환하는 ioutil.ReadDir()을 직접 대체할 수는 없다. os.ReadDir()이나 os.DirEntry를 이용한다고 새 기능이 생긴 것은 아니지만 이를 이용하면 빠르고 간단하게 작업을 수행할 수 있다.
+- os.ReadFile() 함수는 ioutil.ReadFile() 함수로 바로 대체할 수 있다.
+- os.WriteFile() 함수는 ioutil.WriteFile() 함수로 바로 대체할 수 있다.
+- os.MkdirTemp()는 ioutil.TempDir()을 아무 변경 없이 대체할 수 있다. 하지만 os.TempDir() 함수가 이미 있기 때문에 함수 이름이 바뀌었다.
+- os.CreateTemp() 함수는 ioutil.TempFile()과 같다. os.TempFile() 함수가 있지는 않지만 Go의 개발자들은 os.MkdirTemp()와 이름을 맞추고자 os.CreateTemp()를 선택했다.
+- [/ReadDirEntry] : os.ReadDir()의 사용법을 보여준다.(디렉터리의 크기를 계산한다.)
+##### io/fs 패키지[/ioFS]
+- io/fs에서는 FS라는 읽기 전용 인터페이스를 제공한다. 예를 들어 embed.FS는 fs.FS 인터페이스를 구현했기 때문에 io/fs 패키지에서 제공하는 기능들을 활용할 수 있다. 비슷하게 애플리케이션에서 직접 내부 파일 시스템을 만들어 사용할 수도 있다.
