@@ -112,7 +112,28 @@ func printer(ch chan <-bool) {
 - 프로그램의 로직은 monitor() 함수에 구현된다. select 구문을 이용해 전체 프로그램의 동작을 조율한다. 요청을 읽어 들일 때는 read()함수로 readValue 채널에서 데이터를 읽어오고 이는 monitor() 함수에서 제어한다. read() 함수에서는 value 변수의 현재 값을 반환한다. 저장된 값을 변경하고 싶으면 set() 함수를 호출한다. set() 함수에서는 writeValue 채널에 데이터를 써서 select 구문에서 처리될 수 있게 한다. 결론적으로 monitor() 함수를 거치지 않고는 공유 변수를 조작할 수 없게 된다.
 
 ### 클로저 변수와 go 구문
+- 고루틴 내부의 클로저 변수는 고루틴을 실제로 실행할 때 고루틴을 생성하고자 go 구문을 실행하는 시점에 평가한다. 다시 말해 클로저 변수는 Go 스케줄러가 관련 코드를 실행시키기로 결정하는 시점에 해당 값으로 교체된다. [/goClosure]
 
 ### context 패키지
+- context 패키지의 주목적은 Context 타입을 정의하고 캔슬레이션(취소)을 지원하는 것이다. 실제로 지금 하는 일을 취소해야 하는 경우가 있다. 이때 취소 결정을 내린 배경이나 부가 정보를 제공한다면 유용할 것이다. context패키지를 이용하면 바로 이런 일을 할 수 있다.
+- context 패키지의 소스코드는 상당히 간단하다. Context 타입을 구현하는 코드도 단순하다. 그럼에도 context 패키지는 상당히 중요한 역할을 한다.
+- Context 타입은 Deadline(), Done(), Err(), Valeu()로 구성된 인터페이스다. 한가지 좋은 점은 Context 인터페이스의 메서드를 전부 구현할 필요가 없다는 점이다. context.WithCancel(), context.WithDeadline(), context.WithTimeout()과 같은 함수를 이용해 Context 변수를 수정하기만 하면 된다.
+- [/useContext] 예제는 context 패키지의 사용법을 보여준다. 예제에서 context.Background()로 빈 Context를 초기화한다. 빈 Context를 만들 수 있는 다른 함수는 context.TODO()이다. 뒤쪽에서 살펴보겠다.
+##### context를 키/값 저장소로 사용
+- Context에 값을 전달해 키-값 저장소로 활용해본다. 
+- [/keyVal] 예제에는 고루틴이 취소된 부가 정보를 전달하고자 컨텍스트에 값을 전달하지 않는다. 다음의 keyVal.go 프로그램에 context.TODO() 함수를 context.WithValue() 함수와 함께 사용하는 방법이 나온다.
 
-### semaphore 패키지
+### semaphore 패키지[/semaphore]
+- 세마포어(semaphore)는 공유 자원의 접근을 제한하고 제어하는 자료 구조다. Go에서 세마포어는 고루틴에서 공유 자원에 접근하는 것을 제한하지만 원래 세마포어는 스레드에서의 접근을 제한하고자 사용한다. 세마포어는 스레드나 고루틴이 자원에 접근할 수 있는 가중치 값을 가질 수 있다.
+- 이 과정은 Acquire()와 Release() 메서드를 통해 이뤄지고 정의는 다음과 같다. Acquire()의 두 번째 매개변수에서 세마포어의 가중치를 정의한다.
+```
+func (s *Weighted) Acquire(ctx context.Context, n int64) error
+func (s *Weighted) Release(n int64)
+```
+
+### 연습문저
+- 버퍼 채널을 이용해 동시성을 지원하는 wc(1) 유틸리티를 구현하자
+- 공유 메모리를 이용해 동시성을 지원하는 wc(1) 유틸리티를 구현하자.
+- 세마포어를 이용해 동시성을 지원하는 wc(1) 유틸리티를 구현자.
+- 동시성을 지원하는 wc(1) 유틸리티에서 실행 결과를 파일로 저장하도록 구현해보자.
+- wPools.go 에서 각 워커가 wc(1) 의 기능을 구현하도록 수정해보자.
