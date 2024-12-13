@@ -1,3 +1,8 @@
+/*
+-> 먼저 /ws/ws.go => 웹소켓 서버를 실행하고
+go run wsClient.go localhost:1234 ws => 클라이언트를 실행한다.
+*/
+
 package main
 
 import (
@@ -7,6 +12,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -75,7 +81,9 @@ func main() {
 		case <-time.After(4 * time.Second):
 			log.Println("plz give me input", TIMESWAIT)
 			TIMESWAIT++
-			//---------------------------------
+			if TIMESWAIT > TIMESWAITMAX {
+				syscall.Kill(syscall.Getpid(), syscall.SIGINT)
+			}
 		case <-done:
 			return
 		case t := <-input:
