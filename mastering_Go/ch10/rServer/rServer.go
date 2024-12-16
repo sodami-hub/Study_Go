@@ -96,7 +96,7 @@ func getHandler(w http.ResponseWriter, r *http.Request) {
 	if ok && user.Username != "" {
 		log.Println("Found!")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "%s\n", d)
+		fmt.Fprintf(w, "%s : %s\n", d, DATA[user.Username])
 	} else {
 		log.Println("NOT FOUND!")
 		w.WriteHeader(http.StatusNotFound)
@@ -145,6 +145,26 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// "/list"
+func listHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Serving:", r.URL.Path, "from", r.Host, r.Method)
+	if r.Method != http.MethodGet {
+		http.Error(w, "Error:", http.StatusMethodNotAllowed)
+		fmt.Fprintf(w, "%s\n", "Method not allowed")
+		return
+	}
+
+	if len(DATA) == 0 {
+		fmt.Fprintf(w, "%s\n", "have no DATA")
+		return
+	} else {
+		for k, v := range DATA {
+			fmt.Fprintf(w, "name: %s || password: %s \n", k, v)
+		}
+		return
+	}
+}
+
 func main() {
 	arguments := os.Args
 	if len(arguments) != 1 {
@@ -165,6 +185,7 @@ func main() {
 	mux.Handle("/get", http.HandlerFunc(getHandler))
 	mux.Handle("/delete", http.HandlerFunc(deleteHandler))
 	mux.Handle("/", http.HandlerFunc(defaultHandler))
+	mux.Handle("/list", http.HandlerFunc(listHandler))
 
 	fmt.Println("Ready to serve at", PORT)
 	err := s.ListenAndServe()
