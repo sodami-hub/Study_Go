@@ -1,3 +1,9 @@
+/*
+연결 지향의 stream 데이터는 데이터의 경계가 없다. 서버가 응답으로 보낸 메시지는 클라이언트의 세번의 요청에 대한
+각각의 요청은 메시지의 경계가 없는 stream의 성격 때문에 pingpingping이다.
+
+*/
+
 package streamsockunix
 
 import (
@@ -56,6 +62,7 @@ func TestEchoServerUnix(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log("from server : ", string(buf[:n]))
+
 	expected := bytes.Repeat(msg, 3)
 	if !bytes.Equal(expected, buf[:n]) {
 		t.Fatalf("expected reply %q; actual reply %q", expected, buf[:n])

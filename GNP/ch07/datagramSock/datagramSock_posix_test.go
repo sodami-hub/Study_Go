@@ -3,6 +3,8 @@
 /*
 unixgram은 Window에서 동작하지 않기 때문에 build constraint를 이용하여 이 코드가 Windows에서 동작하지 않도록 하고
 패키지를 플랫폼에 맞게 올바르게 임포트할 수 있도록 한다.
+
+데이터 그램을 처리하기 때문에 서버가 응답한 ping은 개별 메시지의 경계가 명확하고 따라서 마지막에 읽은 값은 ping이다.
 */
 
 package datagramsock
@@ -74,6 +76,8 @@ func TestEchoServerUnixDatagram(t *testing.T) {
 	if addr.String() != serverAddr.String() {
 		t.Fatalf("received reply from %q instead of %q", addr, serverAddr)
 	}
+
+	t.Log("from server :", string(buf[:n]))
 
 	if !bytes.Equal(msg, buf[:n]) {
 		t.Fatalf("expected reply %q; actual reply %q", msg, buf[:n])
