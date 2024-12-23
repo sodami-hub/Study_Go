@@ -1,3 +1,4 @@
+// vclock에 request를 보내서 응답을 받아오는걸로 해봤다.
 package main
 
 import (
@@ -28,7 +29,7 @@ func main() {
 		return
 	}
 
-	connection := resp.Header.Get("Content-Type")
+	connection := resp.Header.Get("X-Powered-By")
 	fmt.Println(connection)
 
 	fmt.Printf("vclock.kr : %s (skew %s)\n", dt, now.Sub(dt))
