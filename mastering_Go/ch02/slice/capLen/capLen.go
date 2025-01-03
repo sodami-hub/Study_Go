@@ -19,4 +19,7 @@ func main() {
 	aSlice = append(aSlice, 5)
 	fmt.Println(aSlice, len(aSlice), cap(aSlice))
 
+	c := make([]int, 0, 5)
+	fmt.Println(c, len(c), cap(c))
+
 }

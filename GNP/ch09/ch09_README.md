@@ -42,3 +42,18 @@ srv := &http.Server{
 ### 핸들러[/handler]
 - 클라이언트가 HTTP 서버로 요청을 보내면 서버는 먼저 그 요청으로 무엇을 할지 파악해야 한다. 서버는 클라이언트의 요청에 따라 다양한 리소스를 받아와야 할 수도 있고, 혹은 어떠한 동작을 수행해야 할 수도 있다. 이러한 문제를 해결하기 위한 일반적인 디자인 패턴은 핸들러라 부르는, 요청을 처리할 수 있는 코드로 작성하는 것이다. 앞선 '멀티플렉서'를 통해서 서버는 요청에 대한 핸들러를 선택하는 방법을 알아볼 것이다.
 - Go에서 핸들러는 http.Handler 인터페이스를 구현한 객체이다. 핸들러는 클라이언트의 요청을 읽고 응답을 쓴다. http.Handler 인터페이스는 요청과 응답 모두 매개변수로 받는 하나의 메서드로 구성된다.
+
+
+### httptest를 이용하여 핸들러 테스트하기
+- Go의 표준 라이브러리에는 net/http/httptest 패키지가 존재한다. 이 패키지를 이용하여 손쉽게 핸들러의 유닛 테스트를 할 수 있다. NewRequest 함수의 매개변수로 HTTP 메서드, 대상 리소스, 그리고 요청 보디의 io.Reader를 전달한다. 그러면 http.Handler에서 사용할 수 있는 http.Request 객체의 포인터가 반환된다.
+```
+fun NewRequest(method, target string, body io.Reader) *http.Request
+```
+- http.NewRequest 함수와는 다리게 httptest.NewRequest 함수는 문제가 생기면 에러를 반환하는 대신 패닉한다. 테스트환경이기 때문에 패닉한다.
+- httptest.NewRecorder 함수는 http.ResponseWriter 인터페이슬ㄹ 구현한 httptest.ResponseRecorder 객체의 포인터를 반환한다. http.ResponseRecorder 객체에서 사용할 수 있는 일부 필드는 사용하고 싶게 생겼습니다만, 필드를 직접 사용하지말고 Result 메서드를 사용하기를 권장한다. Result 메서드는 다른 장에서 사용했던 것과 같이 http.Response 객체의 포인터를 반환한다. Result 메서드는 이름과 같이 핸들러가 처리되고 
+httptest.ResponseRecorder의 결과를 받아 올 때가지 기다린 후에 결과값을 반환한다.
+- [/handlers/pitfall_test.go] 에서는 httptest.NewRequest 함수와 httptest.NewRecorder 함수를 사용한다.
+- 한 가지 실수할 수 있는 것은 응답 보디를 쓰는 순서와 응답 상태 코드를 올바르게 설정하는 것이 굉장히 중요하다는 것이다. 클라이언트는 서버로부터 먼저 상태 코드를 받은 후에 응답 보디를 받는다. 만약 응답 보디를 먼저 쓰면 Go는 응답 상태 코드를 200이라고 생각하고 실제로 응답 보디를 보내기 전에 클라이언트에게 먼저 보낸다. 이 동작을 알아보기위해서 [/handlers/pitfall_test.go] 예제를 보자.
+
+### 모든 타입은 핸들러가 될 수 있다.
+- http.Handler가 인터페이스이기 때문에 이를 이용하여 클라이언트의 요청을 처리할 수 있는 강력한 구조를 작성할 수 있다. [/handlers/methods.go] 예제에서는 http.Handler 인터페이스를 구현한 새로운 타입을 정의하여 기본 핸들러를 개선한다. 이 새로운 타입은 특정한 HTTP 메서드 요청에 대해 올바르게 응답할 수 있고, 자동으로 OPTIONS 메서드를 구현해준다.

@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/awoodbeck/gnp/ch09/handlers"
+	"GNP/handlers"
 )
 
 var wg sync.WaitGroup
