@@ -17,6 +17,7 @@ func main() {
 		Addr: "127.0.0.1:8081",
 		Handler: http.TimeoutHandler(
 			handlers.DefaultHandler(), 2*time.Minute, ""),
+		// handlers.DefaultMethodsHandler() 로 바꿔서 Methods 핸들러를 사용할 수 있다.
 		IdleTimeout:       5 * time.Minute,
 		ReadHeaderTimeout: time.Minute,
 	}

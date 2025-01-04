@@ -9,6 +9,16 @@ import (
 
 type Methods map[string]http.Handler
 
+/*
+ServeHTTP() 메서드는 Go언어의 http.Handler 인터페이스의 메서드로, 클라이언트의 HTTP 요청이 들어오면 자동으로 호출된다.
+
+	type Handler interface {
+		ServeHTTP(ResponseWriter, *Request)
+	}
+
+따라서 Methods 타입에는 ServeHTTP(http.ResponseWriter, *http.Request) 메서드가 구현됐기 때문에
+타입 Methods는 http.Handler 인터페이스의 구현체이다.
+*/
 func (h Methods) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	defer func(r io.ReadCloser) {
 		_, _ = io.Copy(io.Discard, r)
