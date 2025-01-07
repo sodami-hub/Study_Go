@@ -34,7 +34,7 @@ Caddy를 사용하면 마치 코드상의 추상화처럼 클라이언트로부�
 ### Caddy 다운로드
 https://caddyserver.com/ 다운로드 링크에서 바이너리를 다운로드 할 수 있다.
 
-## Caddy 환경구성 및 실행하기d
+## Caddy 환경구성 및 실행하기
 - Caddy에서는 환경구성의 목적으로 관리자가 TCP 포트 2019번에서 접근할 수 있는 엔드포인트가 있다. 이 엔드포인트에 환경구성 정보의 JSON 데이터와 함께 POST요청을 전송하여 Caddy의 환경구성을 변경할 수 있으며, GET 요청을 전송하여 환경구성 정보를 읽어올 수 있다. 
 ```
 $ caddy start
@@ -111,3 +111,102 @@ Hello, world!
 ```
 
 ### 실시간으로 Caddy의 환경구성 수정하기
+- chapter08에서 배운 HTTP 메서드를 이용해서 서버의 환경구성을 수정할 수 있다. Caddy가 전송한 JSON을 파싱할 수만 있다면 수정한 내역은 즉시 반영되어 적용된다. 가령, hello 서버를 2021번 포트에서도 리스닝하기 위해 listen 필드에 값을 추가한 환경구성 정보를 이용하여 POST 요청을 보내면 변경된 내용은 즉시 적용된다.
+
+```
+아래와 같이 caddy에 포스트 요청을 보내겠다.(나는 postman을 사용했다.)
+$ curl ocalhost:2019/config/apps/http/servers/hello/listen -X POST -H "Content-Type: application/json" -d "localhost:2021"
+
+그리고 다음 명령을 보내면
+$ lsof -Pi :2019-2025
+COMMAND   PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+caddy   15625 sodami    9u  IPv4 139513      0t0  TCP localhost:2020 (LISTEN)
+caddy   15625 sodami   11u  IPv4 139512      0t0  TCP localhost:2019 (LISTEN)
+caddy   15625 sodami   12u  IPv4 139514      0t0  TCP localhost:2021 (LISTEN)
+$
+//2021번 포트에서도 Listen을 시작했다.
+
+그리고 다시 아래 요청을 보내면 아래와 같은 응답을 확인할 수 있다.
+$ curl localhost:2019/config/
+{
+    "apps": {
+        "http": {
+            "servers": {
+                "hello": {
+                    "listen": [
+                        "localhost:2020",
+                        "localhost:2021"
+                    ],
+                    "routes": [
+                        {
+                            "handle": [
+                                {
+                                    "body": "Hello, world!",
+                                    "handler": "static_response"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+
+```
+
+- Caddy의 환경구성을 실시간으로 바꾸는 일은 거의 없겠지만, 개발 중에는 기능을 추가하기 위해 새로운 서버를 손쉽게 동작할 수 있기에 매우 유용하다. 
+- 아래의 요청으로 2030번 포트에서 리스닝하는 test라는 이름의 새로운 서버를 추가해보겠다.
+```
+$ curl localhost:2019/config/apps/http/servers/test -X POST -H "Content-Type: application/json" -d [뒤의 json 형식은 아래를 참고하라]
+'{
+    "listen":["localhost:2030"],
+    "routes": [{
+        "handle": [{
+            "handler":"static_response",
+            "body":"welcome to my temporary test server."
+        }]
+    }]
+}'
+
+$ curl localhost:2030
+welcome to my temporary test server.
+$
+```
+
+- 일반적으로 Caddy의 환경구성 정보는 서버를 시작할 때 제공해 준다. 앞선 JSON 환경 구성 정보를 caddy.json 이라는 파일로 저장한 후 다음의 명령으로 Caddy를 시작한다.
+```
+$ ll
+total 20
+drwxr-xr-x  4 sodami sodami 4096  1월  7 14:39 ./
+drwxr-x--- 27 sodami sodami 4096  1월  7 14:39 ../
+-rw-rw-r--  1 sodami sodami  644  1월  7 14:39 caddy.json
+
+$ caddy start --config caddy.json 
+2025/01/07 05:39:36.456	INFO	using provided configuration	{"config_file": "caddy.json", "config_adapter": ""}
+2025/01/07 05:39:36.456	INFO	admin	admin endpoint started	{"address": "localhost:2019", "enforce_origin": false, "origins": ["//localhost:2019", "//[::1]:2019", "//127.0.0.1:2019"]}
+...
+2025/01/07 05:39:36.457	INFO	autosaved config (load with --resume flag)	{"file": "/home/sodami/.config/caddy/autosave.json"}
+2025/01/07 05:39:36.457	INFO	serving initial configuration
+Successfully started Caddy (pid=15867) - Caddy is running in the background
+$
+$ lsof -Pi :2019-2025
+COMMAND   PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+caddy   15867 sodami    3u  IPv4 139063      0t0  TCP localhost:2019 (LISTEN)
+caddy   15867 sodami    7u  IPv4 139064      0t0  TCP localhost:2020 (LISTEN)
+caddy   15867 sodami    8u  IPv4 139065      0t0  TCP localhost:2021 (LISTEN)
+$ 
+```
+
+## 모듈과 어댑터로 Caddy확장하기
+Caddy는 기능들을 확장하기 위하여 모듈형 구조를 채택하였다. 모듈형 구조로 인하여 모듈과 환경구성 어댑터를 작성하여 직접 Caddy의 기능을 확장할 수 있다. 이번 섹션에서는 환경 구성 어댑터를 직접 작성하여 Caddy의 환경 구성 정보를 TOML(Tom's Obvious, Minimal Language) 파일에 저장한다. 또한 이전 장의 restrict_prefix 미들웨어를 모듈로 만들어보겠다.
+
+### 환경구성 어댑터 작성하기
+- Caddy는 환경구성을 JSON 포맷에서 TOML과 같은 다른 포맷으로 적용할 수 있는 어댑터 기능을 지원한다. TOML에는 주석과 멀티라인 문자열을 지원한다. Caddy는 환경구성 정보를 저장하기 위한 Caddyfile이라는 이름의 
+커스텀 포맷을 지원한다. 파일 명이 Caddyfile인 경우 Caddy는 caddyfile 어댑터를 자동으로 사용한다. 커맨드 라인에서 직접 어댑터를 지정해 주려면 다음과 같이 사용한다.
+```
+$ caddy start --config Caddyfile --adapter caddyfile
+```
+- adapter 플래그는 Caddy에게 어떤 어댑터를 사용해야 하는지 명시한다. Caddy는 어댑터를 실행하여 입력받은 환경구성 정보를 JSON으로 변환하고, 어댑터가 반환한 JSON 데이터를 파싱해서 사용한다.
+- [/caddy_toml_adapter] 위치에 TOML 환경구성 어댑터를 작성해보겠다.
+
