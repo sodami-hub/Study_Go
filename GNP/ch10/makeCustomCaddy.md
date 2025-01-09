@@ -56,7 +56,7 @@ $ go mod init caddy
 $ go mod tidy
 $ go build main.go
 
-// 빌드하면 caddy라는 이름의 바이너리 파일이 생성된다. 그리고 아래 명령을 실행하면 작성한 커스텀 모듈 및 어댑터가 존재함을 알 수 있따.
+// 빌드하면 caddy라는 이름의 바이너리 파일이 생성된다. 그리고 아래 명령을 실행하면 작성한 커스텀 모듈 및 어댑터가 존재함을 알 수 있다.(리눅스 및 맥OS)
 $ ./caddy list-modules | grep "toml\|restrict_prefix"
 caddy.adapters.toml
 http.handlers.restrict_prefix
@@ -78,4 +78,44 @@ $ mkdir files backend
 - [/backend/main.go]
 
 ### Caddy 환경구성 설정하기
-- 
+- Caddy는 환경구성의 기본 포맷으로 JSON을 사용한다. 환경구성 정보를 JSON으로 작성해도 되지만 이미 TOML을 사용할 수 있도록 잘 동작하는 완벽한 환경구성 어댑터를 구현하였으니 이를 응용해보겠다.
+- Caddy가 요청의 일부를 백엔드 웹 서비스로 리버스 프락시하도록하고, 요청의 일부는 files 서브디렉터리에서 파일을 서빙하도록 한다. 즉, 백엔드 웹 서비스의 라우트와 정적 파일의 라우트, 총 두 개의 라우트가 필요하다. 먼저 caddy.toml 파일에 서버의 환경구성 정보를 정의한다.[/caddy/caddy.toml]
+```
+[apps.http.servers.test_server]
+listen = [
+    'localhost:2020',
+]
+```
+- TOML 어댑터는 TOML 정보를 JSON으로 그대로 변환해 줍니다. 따라서 Caddy가 기대하는 네임스페이스를 일치하게 사용할 수 있도록 주의해야 된다. 여기서 사용할 서버의 네임스페이스는 apps.http.servers.test_server이다. 이 서버는 localhost의 2020번 포트에서 연결 요청을 리스닝한다.
+
+### 서비스로 리버스 프락시 구성하기
+- Caddy는 수신 연결을 그대로 백엔드 웹 서비스로 전송할 수 있는 강력한 리버스 프락시 핸들러를 내장하고 있다. Caddy는 클라이언트의 요청과 일치하는 라우트를 찾은 후에 해당하는 라우트의 핸들러로 요청을 전달한다.
+- [/caddy/caddy.toml] 파일에 라우트와 리버스 프락시 핸들러를 추가한다.
+
+### 정적 파일 서빙하기
+- 9장에서는 http.FileServer를 사용하여 정적파일을 서빙했다. Caddy에는 비슷한 기능을 하는 file_server 핸들러가 존재한다. [caddy.toml]파일에 정적 파일을 서빙하기 위한 두 번째 라우트틀 추가하겠다.
+
+
+### 구성 확인해 보기
+- Caddy를 시작하고 환경구성 작업이 예상대로 되었는지 확인해보겠다. 일부 이미지 파일이 존재하기 때문에 웹 브라우저의 사용을 권장한다.
+
+
+```
+- caddy.toml 파일과 toml 어댑터 설정을 사용하여 Caddy를 시작한다.
+$ ./caddy start --config caddy.toml --adapter toml
+
+- 이어서 백엔드 웹 서비스를 시작한다.
+$ go run backend.go
+```
+
+### 자동 HTTPS 기능 추가하기
+- 이제 Caddy의 핵심 기능인 자동 HTTPS 기능을 추가해보겠다. Caddy를 사용하면 잠깐 사이에 현대의 모든 웹 브라우저가 신뢰하는 인증서를 사용하여 HTTPS를 지원하는 웹 사이트를 구축할 수 있다. Caddy 서버는 굉장히 안정적으로 동작하며, 서버 동작에 전혀 영향을 주지 않고 Let's Encrypt의 인증서를 몇 달마다 주기적으로 교체해 준다. 직접 Go 기반의 웹 서버를 작성하여 이러한 동작을 구현할 수도 있지만, 검증된 웹 서버의 기능은 Caddy를 사용하는 것이 더욱 효율적이다. 개발자는 서비스에 대한 로직을 구현하는데 집중하면 되고, Caddy에 원하는 기능이 없다면 모듈을 사용하여 추가하면 된다.
+- Caddy는 서빙하기 위해 설정된 도메인 네임을 확인할 수 있는 경우 자동으로 TLS를 활성화시켜준다. 이번 장에서 생성한 caddy.toml 환경 파일에는 도메인에 대한 정보가 없기 때문에 HTTPS가 활성화되지 않았다. Caddy의 소켓을 localhost로 바인딩하긴 했지만, 그건 어느 도메인에서 서빙할지를 설정한 것이 아니라 단지 소켓 주소를 리스닝하도록 한 것이다.
+- 일반적으로 HTTPS를 활성화하는 방법은 Caddy의 라우트에 호스트 매처를 추가하는 것이다.
+```
+[[apps.http.servers.server.routes.match]]
+host = [
+    'example.com'
+]
+```
+- 호스트 매처를 통해 Caddy는 현재 example.com의 도메인에서 서빙 중임을 확인할 수 있따. HTTPS를 활성화하기 위해 example.com 도메인에 대해 존재하는 TLS 인증서가 없다면 Let's Encrypt에서 도메인을 검증하고 인증서를 발급바든ㄴ다. Caddy는 필요에 따라 인증서를 관리해주고 자동으로 갱신해준다.

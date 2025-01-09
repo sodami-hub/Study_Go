@@ -16,6 +16,8 @@ var addr = flag.String("listen", "localhost:8080", "listen address")
 func main() {
 	flag.Parse()
 
+	fmt.Println("addr :", *addr)
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
@@ -42,6 +44,11 @@ func run(addr string, c chan os.Signal) error {
 
 			// 핸들러는 HTML 문서를 바이트 슬라이스 포맷으로 응답에 쓴다.
 			_, _ = w.Write(index)
+		}),
+	)
+	mux.Handle("/caddy",
+		http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("hello world"))
 		}),
 	)
 
@@ -76,15 +83,15 @@ func run(addr string, c chan os.Signal) error {
 HTML내의 /style.css라는 리소스를 접했을 때 최초 요청으로부터 스키마 정보와 호스트 네임, 포트번호를 가져와서 사용한다.
 이를 위해 Caddy환경 구성에서 요청의 일부는 정적 파일을 서빙하도록 하고 그 외에는 백엔드 웹 서비스로 전달하도록 Caddy를 환경구성해야 한다.
 */
-var index = []byte(`<!DOCKTYPE html>
+var index = []byte(`<!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<title>Caddy Backend Test</title>
-	<link href="/style.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <title>Caddy Backend Test</title>
+    <link href="../style.css" rel="stylesheet">
 </head>
 <body>
-	<h1>Caddy를 사용한 테스트 서버입니다.</h1>
-	<p><img src="/hiking.svg" alt="hiking gopher"></p>
+	<h1>Caddy를 사용한 테스트 서버이다.</h1>
+    <p><img src="../hiking.svg" alt="hiking gopher"></p>
 </body>
 </html>`)
