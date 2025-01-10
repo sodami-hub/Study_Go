@@ -2,10 +2,12 @@ package ch11
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"golang.org/x/net/http2"
 )
@@ -85,4 +87,31 @@ func TestClientTLS(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expectecd status %d; actual status %d", http.StatusOK, resp.StatusCode)
 	}
+}
+
+// TCP 상에서의 TLS
+func TestClientTLSgoogle(t *testing.T) {
+	/*
+		tls.DialWithDialer 함수는 *net.Dialer 객체의 포인터와 네트워크 종류(tcp), 네트워트 주소, 그리고 *tls.Config 객체의 포인터를 매개변수로 받는다. 여기서 다이얼러에 30초의 타임아웃과 TLS 설정을 지정해 주었다.
+		다이얼이 성공하면 TLS 연결의 세부 상태 정보를 탐색할 수 있다.
+	*/
+	conn, err := tls.DialWithDialer(
+		&net.Dialer{Timeout: 30 * time.Second},
+		"tcp",
+		"www.google.com:443",
+		&tls.Config{
+			CurvePreferences: []tls.CurveID{tls.CurveP256},
+			MinVersion:       tls.VersionTLS12,
+		},
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	state := conn.ConnectionState()
+	t.Logf("TLS 1.%d", state.Version-tls.VersionTLS10)
+	t.Log(tls.CipherSuiteName(state.CipherSuite))
+	t.Log(state.VerifiedChains[0][0].Issuer.Organization[0])
+
+	_ = conn.Close()
 }
