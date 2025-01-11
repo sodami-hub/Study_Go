@@ -38,6 +38,7 @@ $ go test -race -run TestClientTLSgoogle -v ./
 #### 서버 사이드 TLS
 - 서버 사이드의 코드는 지금까지 배운 코드와 크게 다르지 않다. 주요 차이점은 서버가 핸드셰이크 프로세스에서 클라이언트에게 인증서를 제공해야 한다는 것이다. Go가 설치된 디렉터리 하위의 src/crypto/tls 서브디렉터리 내에 존재하는 generate_cert.go 파일을 이용하여 사설 인증서를 생성할 수 있다. 프로덕션 서비스에서는 Let's Encrypt에서 획득한 인증서나 다른 인증 기관으로부터 획득한 인증서를 사용하는 것이 낫다. LEGO 라이브러리를 이용하여 개발중인 서비스에 인증서 관리를 할 수 있다. 다음의 명령어로 새로운 인증서와 개인키를 생성하자.
 ```
+# 우분투 환경에서 해당 디렉터리는 /usr/local/go/src/... 에 있다.
 $ go run $GOROOT/src/crypto/tls/generate_cert.go -host localhost -ecdsa-curve P256
 ```
 
