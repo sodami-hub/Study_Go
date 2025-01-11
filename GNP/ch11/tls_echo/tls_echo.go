@@ -1,9 +1,10 @@
-package tlsecho
+package tls_echo
 
 import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"log"
 	"net"
 	"time"
 )
@@ -12,7 +13,7 @@ import (
 func NewTLSServer(ctx context.Context, address string, maxIdle time.Duration, tlsConfig *tls.Config) *Server {
 	return &Server{
 		ctx:       ctx,
-		ready:     make(chan struct{}),
+		ready:     make(chan struct{}), // make() 를 사용해서 생성하기 때문에 초기 생성시 nil이 아니다.
 		addr:      address,
 		maxIdle:   maxIdle,
 		tlsConfig: tlsConfig,
@@ -28,6 +29,7 @@ type Server struct {
 }
 
 func (s *Server) Ready() {
+	log.Println("into the Ready()")
 	if s.ready != nil {
 		<-s.ready
 	}
@@ -35,6 +37,8 @@ func (s *Server) Ready() {
 
 // ------------- 리스닝과 서빙을 처리하고 서버 연결의 읽기 가능한 상태를 알리는 메서드 추가
 func (s *Server) ListenAndServeTLS(certFn, keyFn string) error {
+
+	log.Println("into the ListenAndServeTLS()")
 	if s.addr == "" {
 		s.addr = "localhost:443"
 	}
@@ -60,6 +64,8 @@ ServeTLS 메서드는 서버의 TLS 구성을 확인한다. 구성이 nil 이면
 해당 필드는 서버에서 사용하며, 클라이언트가 원하는 암호와 스위트를 기다리지 ㅇ낳고 서버에서 먼저 TLS 협상 단계에서 사용할 암호화 스위트를 사용한다.
 */
 func (s Server) ServeTLS(l net.Listener, certFn, keyFn string) error {
+	log.Println("into the ServeTLS()")
+
 	if s.tlsConfig == nil {
 		s.tlsConfig = &tls.Config{
 			CurvePreferences:         []tls.CurveID{tls.CurveP256},
@@ -83,7 +89,9 @@ func (s Server) ServeTLS(l net.Listener, certFn, keyFn string) error {
 	// tls.NewListener 함수에 net.Listener 객체와 해당 TLS 구성 정보를 전달하여 TLS를 지원하면 된다.
 	// tls.NewListener 함수는 리스너를 받아서 해당 리스너의 Accept 메서드에 TLS를 인지하도록 하는 연결 객체를 반환한다는 점에서 미들웨어처럼 동작한다.
 	tlsListener := tls.NewListener(l, s.tlsConfig)
+
 	if s.ready != nil {
+		log.Println("before close(s.ready)")
 		close(s.ready)
 	}
 
@@ -95,22 +103,26 @@ func (s Server) ServeTLS(l net.Listener, certFn, keyFn string) error {
 		}
 
 		go func() {
-			if s.maxIdle > 0 {
-				err := conn.SetDeadline(time.Now().Add(s.maxIdle))
+			for {
+				if s.maxIdle > 0 {
+					err := conn.SetDeadline(time.Now().Add(s.maxIdle))
+					if err != nil {
+						return
+					}
+				}
+
+				buf := make([]byte, 1024)
+				n, err := conn.Read(buf)
+				log.Println("from client", string(buf[:n]))
 				if err != nil {
 					return
 				}
-			}
 
-			buf := make([]byte, 1024)
-			n, err := conn.Read(buf)
-			if err != nil {
-				return
-			}
-
-			_, err = conn.Write(buf[:n])
-			if err != nil {
-				return
+				_, err = conn.Write(buf[:n])
+				log.Println("to client", string(buf[:n]))
+				if err != nil {
+					return
+				}
 			}
 		}()
 	}
