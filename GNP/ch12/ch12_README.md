@@ -21,7 +21,5 @@ type Chore struct {
     Description string
 }
 ```
-
-
-- [cmd/housework.go] - 집안일 애플리케이션
+- [cmd/housework.go] - 집안일 애플리케이션 : 집안일의 구조체를 사용해서 커맨드 라인에서 집안일을 관리하는 애플리케이션이다. 집안일의 목록과 현재 상태를 보여주고, 목록에 집안일을 추가하고, 끝낸 집안일을 완료했다고 마킹한다.
 
