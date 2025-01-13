@@ -3,8 +3,11 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
+	"strconv"
+	"strings"
 
 	"housework"
 	/*
@@ -75,9 +78,85 @@ func flush(chores []*housework.Chore) error {
 
 // ============= 표준 출력으로 집안일 목록 출력하기
 func list() error {
+	chores, err := load()
+	if err != nil {
+		return err
+	}
+
+	if len(chores) == 0 {
+		fmt.Println("You're all caught up!")
+		return nil
+	}
+
+	fmt.Println("#\t[X]\tDescription")
+	for i, chore := range chores {
+		c := " "
+		if chore.Complete {
+			c = "X"
+		}
+		fmt.Printf("%d\t[%s]\t%s\n", i+1, c, chore.Descrption)
+	}
 	return nil
 }
 
+// ================= 목록에 집안일 추가하기
+func add(s string) error {
+	chores, err := load()
+	if err != nil {
+		return err
+	}
+
+	for _, chore := range strings.Split(s, ",") {
+		if desc := strings.TrimSpace(chore); desc != "" {
+			chores = append(chores, &housework.Chore{
+				Descrption: desc,
+			})
+		}
+	}
+	return flush(chores)
+}
+
+// ========================== 완료한 집안일 마킹하기
+func complete(s string) error {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return err
+	}
+
+	chores, err := load()
+	if err != nil {
+		return err
+	}
+
+	if i < 1 || i > len(chores) {
+		return fmt.Errorf("chore %d not found", i)
+	}
+
+	chores[i-1].Complete = true
+
+	return flush(chores)
+}
+
+// ======================= 집안일 애플리케이션의 메인 로직
 func main() {
+	flag.Parse()
+
+	var err error
+
+	switch strings.ToLower(flag.Arg(0)) {
+	case "add":
+		err = add(strings.Join(flag.Args()[1:], " "))
+	case "complete":
+		err = complete(flag.Arg(1))
+	}
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = list()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
