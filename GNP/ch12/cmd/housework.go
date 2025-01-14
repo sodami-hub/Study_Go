@@ -15,8 +15,8 @@ import (
 		저장해보겠다. 이를 통해 다양한 직렬화 포맷으로 전환하는 것이 얼마나 간단한 일인지 알수있다.
 		이를 위해서 아래의 직렬화 포맷들을 임포트한다.
 	*/
-	storage "json"
-	// storage "gob"
+	// storage "json"
+	storage "gob"
 	// storage "protobuf"
 )
 
@@ -24,6 +24,9 @@ var dataFile string
 
 // =============== 집안일 어플리케이션의 초기화 코드
 func init() {
+	// StringVar 함수는 dataFile 변수를 커맨드 라인 플래그 -file에 연결한다. 기본값은 housework.db 이며
+	// 사용법(flag.Usage)은 data file 이다.
+	// go run housework.go -file=mydata.db 로 하면 연결되는 파일이름이 바뀐다.
 	flag.StringVar(&dataFile, "file", "housework.db", "data file")
 	/*
 		이 코드는 커맨드 라인의 매개변수와 사용법을 나타낸다. 매개변수로 add와 함께 쉼표로 구분된 집안일을 받아 목록에 더하거나
@@ -142,7 +145,11 @@ func main() {
 	flag.Parse()
 
 	var err error
-
+	/*
+		flag.Arg(0) 과 os.Args[0]은 서로 다른 값을 가진다.
+		os.Args[0]은 프로그램의 실행 파일 이름(경로)을 값으로 가진다.
+		flag.Arg(0)은 커맨드 라인 플래그를 제외한 첫 번째 인수를 반환한다. 이는 flag.Parse() 함수가 호출된 후에 사용가능하다.
+	*/
 	switch strings.ToLower(flag.Arg(0)) {
 	case "add":
 		err = add(strings.Join(flag.Args()[1:], " "))
