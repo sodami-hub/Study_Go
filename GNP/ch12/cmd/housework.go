@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"strings"
 
+	// protobuf를 사용하는 경우 housework 구조체의 위치도 protobuf용으로 만든 자료형으로 바꿔야 된다. ../housework/v1
 	"housework"
 	/*
 		이 애플리케이션의 목적은 데이터 직렬화이기 때문에 여러 데이터 직렬화 포맷을 사용하여 데이터를
@@ -16,8 +17,8 @@ import (
 		이를 위해서 아래의 직렬화 포맷들을 임포트한다.
 	*/
 	// storage "json"
-	storage "gob"
-	// storage "protobuf"
+	// storage "gob"
+	storage "protobuf"
 )
 
 var dataFile string
@@ -97,7 +98,7 @@ func list() error {
 		if chore.Complete {
 			c = "X"
 		}
-		fmt.Printf("%d\t[%s]\t%s\n", i+1, c, chore.Descrption)
+		fmt.Printf("%d\t[%s]\t%s\n", i+1, c, chore.Description)
 	}
 	return nil
 }
@@ -112,7 +113,7 @@ func add(s string) error {
 	for _, chore := range strings.Split(s, ",") {
 		if desc := strings.TrimSpace(chore); desc != "" {
 			chores = append(chores, &housework.Chore{
-				Descrption: desc,
+				Description: desc,
 			})
 		}
 	}
