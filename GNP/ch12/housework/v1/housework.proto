@@ -16,7 +16,7 @@ message Chore {
     string description = 2;
 }
 
-// repeated 필드 타입을 지정해서 여러 개의 집안일을 나타내느 Chores 메시지 정의
+// repeated 필드 타입을 지정해서 여러 개의 집안일을 나타내는 Chores 메시지 정의
 message Chores {
     repeated Chore chores = 1;
 }
