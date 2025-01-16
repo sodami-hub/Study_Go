@@ -22,12 +22,22 @@ message Chores {
 }
 
 // gRPC RobotMaid 서비스를 지원하기 위한 프로토콜버퍼 정의 추가
+
+/*
+RobotMaid라는 이름의 새로운 서비스를 정의하고, 세 개의 RPC 메서드를 추가한다. 메서드는 각각 add, complete, list 함수에 해당한다.
+이 함수들을 지역적으로 호출하는 대신 RPC를 통해 RobotMaid의 해당하는 메서드를 호출한다.
+각 메서드는 접두사로 rpc 키워드를 사용하고 메서드 이름과 파스칼 케이스를 사용한다. 다음으로 소괄호 안에 요청 메시지 타입과 returns 키워드를,
+이어서 소괄호안에 return할 메시지 타입을 작성한다.
+*/
 service RobotMaid {
-    rpc Add (Chores) returns (Response);
-    rpc Complete (CompleteRequest) returns (Response);
-    rpc List (Empty) returns (Chores);
+    rpc Add (Chores) returns (Response){}
+    rpc Complete (CompleteRequest) returns (Response){}
+    rpc List (Empty) returns (Chores){}
 }
 
+/*
+요청 메서드 타입과 리턴 타입에 대한 추가 정의를 추가한다.
+*/
 message CompleteRequest {
     int32 chore_number = 1;
 }

@@ -86,3 +86,36 @@ $
 
 #### gRPC로 서비스 연결하기
 gRPC 프로엠워크는 많은 RPC 세부 구현을 추상화한 라이브러리들의 집합이다. 플랫폼에 중립적이며 프로그래밍 언어에도 독립적이다. 즉, gRPC를 사용하면 Windows에서 동작중인 Go언어로 개발된 서비스와 리눅스에서 동작 중인 Rust로 개발된 서비스를 통합할 수 있다.
+```
+$ go get -u google.golang.org/grpc
+$ go get -u google.golang.org/grpc/cmd/protoc-gen-go-grpc
+$ sudo apt install protoc-gen-go-grpc
+```
+사용할 패키지를 설치한다.
+- [/housework/v1/housework.proto] 코드에 gRPC RobotMaid 서비스를 지원하기 위한 프로토콜 버퍼 정의를 추가한다.
+```
+// 아래 명령을 실행해서 housework_grpc.pb.go 파일을 생성한다. 이 파일은 gRPC를 go 코드로 바꾸는 명령이다.
+$ protoc --go-grpc_out=. --go-grpc_opt=paths=source_relative ./housework.proto
+// housework.proto에 새롭게 추가된 프로토콜 버퍼의 타입을 go 코드로 바꾸기 위해서 아래 명령을 실행한다.
+$ $ protoc --go_out=. --go_opt=paths=source_relative housework.proto
+```
+#### TLS가 적용된 gRPC 서버 구현하기
+- gRPC 클라이언트와 서버를 구현해보겠다. 기본적으로 gRPC는 보안 연결을 필요로 하기 때문에 서버에서는 TLS를 지원해야 한다. 
+```
+$ go run $GOPATH/src/crypto/tls/generate_cert.go -host localhost -ecdsa-curve P256
+```
+위의 명령으로 cert.pem, key.pem을 생성한후 인증서를 고정해서 사용하도록한다.
+- .proto 파일에서 생성된 Go 코드를 이용하여 RobotMaid 클라이언트와 서버를 정의하고, gRPC를 이용하여 RobotMaid 클라이언트로 네트워크상의 서버와 통신한다. 먼저, 로봇 메이드의 서버를 만들어보겟다. .proto 파일에서 생성된 RobotMaidServer 인터페이스는 다음과 같다
+```
+type RobotMaidServer interface {
+	Add(context.Context, *Chores) (*Response, error)
+	Complete(context.Context, *CompleteRequest) (*Response, error)
+	List(context.Context, *Empty) (*Chores, error)
+	mustEmbedUnimplementedRobotMaidServer()
+}
+```
+- [/server/rosie.go] 에서 위의 인터페이스를 구현해보겠다. housework.proto에서 생성된 housework_grpc.pb.go 코드가 교제의 코드와는 달라서 인터페이스를 구현하는데 어려움을 겪었지만 어찌어찌 rosie.go와 같은 디렉터리의 server.go를 구현했다.
+
+#### gRPC 클라이언트를 구현하여 서버 테스트하기
+- 앞서 '객체 직렬화하기'에서 작성한 코드와 크게 다르지 않다. 주요한 차이점은 gRPC 클라이언트를 초기화하고 add, complete, list 함수를 수정해서 사용한다는 점이다. 또한, 프로토콜 버퍼를 지원하는 다른 프로그래밍 언어를 사용하여 클라이언트 부분을 별도로 구현할 수 있다. 동일한 .proto 파일을 이용하여 클라이언트를 구현하면 프로그래밍 언어와 상관없이 앞서 구현한 서버와 아무런 문제없이 동작할 것이다.
+- 집안일 애플리케이션의 gRPC 클라이언트 코드[/client/client.go]
