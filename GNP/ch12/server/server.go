@@ -45,6 +45,8 @@ func main() {
 			CurvePreferences:         []tls.CurveID{tls.CurveP256},
 			MinVersion:               tls.VersionTLS12,
 			PreferServerCipherSuites: true,
+			NextProtos:               []string{"h2"},
+			// ALPN(Application-Layer Protocol Negotiation) 속성 설정 h2는 서버와 클라이언트가 모두 HTTP/2를 지원하는 경우 h2 프로토콜을 사용해서 통신한다.
 		},
 	)))
 }

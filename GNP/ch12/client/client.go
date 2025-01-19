@@ -2,14 +2,20 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"housework"
+
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // 집안일 애플리케이션의 gRPC 클라이언트 초기 코드
@@ -49,7 +55,7 @@ gRPC 통신 과정
 func list(ctx context.Context, client housework.RobotMaidClient) error {
 	chores, err := client.List(ctx, new(housework.Empty))
 	if err != nil {
-		return err
+		return fmt.Errorf("line 58 : %s", err)
 	}
 
 	if len(chores.Chores) == 0 {
@@ -90,7 +96,7 @@ func add(ctx context.Context, client housework.RobotMaidClient, s string) error 
 // gRPC 클라이언트를 사용하여 완료된 집안일 마킹하기
 func complete(ctx context.Context, client housework.RobotMaidClient, s string) error {
 	i, err := strconv.Atoi(s)
-	if err != nil {
+	if err == nil {
 		// housework.proto 코드의 chore_number 와 같이 스네이크 케이스로된 필드를
 		// protoc-gen-go 명령으로 Go코드로 컴파일하면 파스칼 케이스로 바뀐다.
 		// 그리고 int 타입으로 바뀐 i 값을 다시 int32값으로 바꿔서 보낸다.
@@ -103,4 +109,48 @@ func complete(ctx context.Context, client housework.RobotMaidClient, s string) e
 func main() {
 	flag.Parse()
 
+	// TLS와 인증서 고정을 이용하여 새로운 gRPC 연결 생성
+	caCert, err := os.ReadFile(caCertFn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	certPool := x509.NewCertPool()
+	if ok := certPool.AppendCertsFromPEM(caCert); !ok {
+		log.Fatal("failed to add certificate to pool")
+	}
+
+	conn, err := grpc.NewClient(
+		addr,
+		grpc.WithTransportCredentials(
+			credentials.NewTLS(
+				&tls.Config{
+					CurvePreferences: []tls.CurveID{tls.CurveP256},
+					MinVersion:       tls.VersionTLS12,
+					RootCAs:          certPool,
+					NextProtos:       []string{"h2"}, // ALPN(Application-Layer Protocol Negotiation) 속성 설정
+				},
+			),
+		),
+	)
+	if err != nil {
+		log.Fatal("135 line", err)
+	}
+
+	// 새로운 gRPC 클라이언트 초기화하고 서버로 요청하기
+	rosie := housework.NewRobotMaidClient(conn)
+	ctx := context.Background()
+	switch strings.ToLower(flag.Arg(0)) {
+	case "add":
+		err = add(ctx, rosie, strings.Join(flag.Args()[1:], " "))
+	case "complete":
+		err = complete(ctx, rosie, flag.Arg(1))
+	}
+	if err != nil {
+		log.Fatal("148 line", err)
+	}
+
+	err = list(ctx, rosie)
+	if err != nil {
+		log.Fatal("153 line", err)
+	}
 }
